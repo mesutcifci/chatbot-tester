@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { IBotData } from "../../App";
+import { IBotData, IBotVariable } from "../../types";
+
 import {
   inputOuterContainerStyles,
   inputStyles,
@@ -16,7 +17,10 @@ interface IBotBuilderProps {
 
 const BotBuilder = ({ botData, setBotData }: IBotBuilderProps) => {
   const [botMessage, setBotMessage] = useState("");
-  const [botVariable, setBotVariable] = useState("");
+  const [botVariable, setBotVariable] = useState<IBotVariable>({
+    name: "",
+    value: "",
+  });
   const [leftDelimiter, setLeftDelimiter] = useState("");
   const [rightDelimiter, setRightDelimiter] = useState("");
 
@@ -30,11 +34,22 @@ const BotBuilder = ({ botData, setBotData }: IBotBuilderProps) => {
         setBotMessage("");
         break;
       case "botVariable":
-        setBotData((previousState) => ({
-          ...previousState,
-          botVariables: [...previousState.botVariables, botVariable.trim()],
-        }));
-        setBotVariable("");
+        if (
+          botVariable?.name.trim().length > 0 &&
+          botVariable?.value.trim().length > 0
+        ) {
+          setBotData((previousState) => ({
+            ...previousState,
+            botVariables: [
+              ...previousState.botVariables,
+              { name: botVariable.name, value: botVariable.value },
+            ],
+          }));
+          setBotVariable({
+            name: "",
+            value: "",
+          });
+        }
         break;
       case "leftDelimiter":
         setBotData((previousState) => ({
@@ -62,6 +77,27 @@ const BotBuilder = ({ botData, setBotData }: IBotBuilderProps) => {
     if (event.key.toLowerCase() === "enter") {
       handleAddBotData(inputName);
     }
+  };
+
+  const handleChangeBotVariableNameInput = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const name = event.currentTarget.value;
+
+    setBotVariable((previousState) => ({
+      ...previousState,
+      name,
+    }));
+  };
+
+  const handleChangeBotVariableValueInput = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = event.currentTarget.value;
+    setBotVariable((previousState) => ({
+      ...previousState,
+      value,
+    }));
   };
 
   return (
@@ -108,39 +144,42 @@ const BotBuilder = ({ botData, setBotData }: IBotBuilderProps) => {
 
       {/* BOT VARIABLE INPUT */}
       <div className={`${inputOuterContainerStyles}`}>
-        <label htmlFor={"botVariable"} className={`${labelStyles}`}>
-          Bot Variables
-        </label>
+        <label className={`${labelStyles}`}>Bot Variable</label>
 
         <div className={`${inputInnerContainerStyles}`}>
           <input
             className={`${inputStyles}`}
-            name="botVariable"
-            id="botVariable"
+            name="botVariableName"
+            id="botVariableName"
             type="text"
             placeholder="Enter variable name"
-            value={botVariable}
-            onChange={(event) => setBotVariable(event.currentTarget.value)}
-            onKeyDown={
-              botVariable.trim().length > 0
-                ? (event) => handleEnter(event, "botVariable")
-                : undefined
-            }
+            value={botVariable.name}
+            onChange={handleChangeBotVariableNameInput}
           />
-          {botVariable.trim().length > 0 && (
-            <button
-              className={`${addButtonStyles}`}
-              onClick={() => handleAddBotData("botVariable")}
-            >
-              Add
-            </button>
-          )}
+          <input
+            className={`${inputStyles}`}
+            name="botVariableValue"
+            id="botVariableValue"
+            type="text"
+            placeholder="Enter variable value"
+            value={botVariable.value}
+            onChange={handleChangeBotVariableValueInput}
+          />
+          {botVariable.name.trim().length > 0 &&
+            botVariable.value.trim().length > 0 && (
+              <button
+                className={`${addButtonStyles}`}
+                onClick={() => handleAddBotData("botVariable")}
+              >
+                Add
+              </button>
+            )}
         </div>
         {botData.botVariables.length > 0 && (
           <div>
             {botData.botVariables.map((message, index) => (
               <p key={index} className={`${inputPreviewStyles}`}>
-                {message}
+                {`${message.name}: ${message.value}`}
               </p>
             ))}
           </div>

@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { BotBuilder, ChatbotPreview } from "./components";
-export interface IBotData {
-  botMessages: string[];
-  botVariables: string[];
-  leftDelimiter: string;
-  rightDelimiter: string;
-}
+import { IBotData } from "./types";
 
 const initialState: IBotData = {
   botMessages: [],
@@ -19,7 +14,7 @@ function App() {
 
   return (
     <div className="App flex flex-col justify-center items-center min-w-[320px]">
-      <ChatbotPreview />
+      <ChatbotPreview botData={botData} />
       <BotBuilder botData={botData} setBotData={setBotData} />
     </div>
   );
