@@ -21,25 +21,40 @@ const ChatbotPreview = ({
     stringWithoutDelimiters: string,
     message: string
   ) => {
-    botVariables.forEach(() => {
-      const matchedObject = botVariables.find(
-        (variable) => variable.name === stringWithoutDelimiters
-      );
+    if (botVariables.length > 0) {
+      botVariables.forEach(() => {
+        const matchedObject = botVariables.find(
+          (variable) => variable.name === stringWithoutDelimiters
+        );
 
-      if (matchedObject) {
-        message = message.replace(stringWithDelimiters, matchedObject.value);
-      } else {
-        message = message.replaceAll(stringWithDelimiters, "");
-      }
-    });
+        if (matchedObject) {
+          message = message.replace(stringWithDelimiters, matchedObject.value);
+        } else {
+          message = message.replaceAll(stringWithDelimiters, "");
+        }
+      });
+    } else {
+      message = message.replaceAll(stringWithDelimiters, "");
+    }
 
     return message;
   };
 
   const returnUpdatedMessage = (message: string) => {
     let loopFlag = true;
+    let counter = 1;
     while (loopFlag) {
       let firstIndex = message.indexOf(leftDelimiter);
+      counter++;
+      /**
+       * The second parameter of indexOf method specify which position start from
+       * Hi @@firstname@@ @@lastname@@, how are you today? => in this message we want to find
+       * index of the first and the last characters of this string @@firstname@@
+       * so in that case firstIndex should be 3
+       * on the other hand because we want to pass right delimiter characters
+       * we should start to search index of character "f", which is 5
+       * formula: start position = 3(firstIndex) + 2(rightDelimiter.length);
+       */
       let secondIndex = message.indexOf(
         rightDelimiter,
         firstIndex + rightDelimiter.length
@@ -85,7 +100,7 @@ const ChatbotPreview = ({
       {interpolatedMessages &&
         interpolatedMessages.length > 0 &&
         interpolatedMessages.map((message, index) => (
-          <p>{`Message ${index + 1}: ${message}`}</p>
+          <p key={index}>{`Message ${index + 1}: ${message}`}</p>
         ))}
     </div>
   );
